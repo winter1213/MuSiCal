@@ -128,6 +128,28 @@ def sigplot_bar(sig, norm=True, figsize=None, title=None, width=0.8,
     elif sig_type == 'Indel83':
         if n_features != 83:
             raise ValueError('sig_type is set to Indel83 but the number of features is not equal to 83.')
+    elif sig_type == 'Joint':
+        if n_features != 179:
+            raise ValueError('sig_type is set to Joint but the number of features is not equal to 179.')
+        channel_list = []
+
+        for i in ('C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G'):
+            for j in ('A', 'C', 'G', 'T'):
+                for k in ('A', 'C', 'G', 'T'):
+                    channel_list.append(f"{j}[{i}]{k}")
+
+        catalog_sbs = []
+
+        for i in ('A', 'C', 'G', 'T'):
+            for j in ('C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G'):
+                for k in ('A', 'C', 'G', 'T'):
+                    catalog_sbs.append(f"{i}[{j}]{k}")
+
+        order = [catalog_sbs.index(i) for i in channel_list]
+
+        sig_sbs_ordered = sig[:96, :][order]
+        sig_indel83 = sig[96:, :]
+        sig = np.concatenate((sig_sbs_ordered, sig_indel83), axis=0)
     else:
         pass
 
@@ -139,6 +161,11 @@ def sigplot_bar(sig, norm=True, figsize=None, title=None, width=0.8,
                 colors.extend([colorPaletteTrinucleotides[i]]*16)
         elif sig_type == 'Indel83':
             colors = colorsIndel83
+        elif sig_type == 'Joint':
+            colors = []
+            for i in range(0, 6):
+                colors.extend([colorPaletteTrinucleotides[i]]*16)
+            colors.extend(colorsIndel83)
         else:
             colors = ['gray']*n_features
     else:
